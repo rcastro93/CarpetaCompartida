@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Administrador de Personas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.1.js"
+        integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.js'></script>
+    <!-- <script src='https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/locale/es.js'></script> -->
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+        });
+
+    </script>
+
+    <style>
+        /* .select2-container .select2-selection--multiple {
+            min-height: 100px;
+            padding-bottom: 50px;
+        } */
+        /* .select2-selection__choice {
+            width: 100px;
+        } */
+
+
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background-image: linear-gradient(-225deg, #A445B2 0%, #D41872 52%, #FF0066 100%);
+            min-height: 100%;
+            padding-bottom: 5rem;
+        }
+
+        #calendar {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .titulo {
+            font-weight: bold;
+            font-size: 3rem;
+            text-transform: uppercase;
+            color: white;
+        }
+
+        .container {
+            background-color: white;
+        }
+
+        header {
+            margin-top: 3rem;
+        }
+
+        header h1 {
+            color: white;
+        }
+
+        .lista-citas .persona {
+            border-bottom: 1px solid #070606;
+            padding: 2rem;
+            padding-bottom: 3rem;
+        }
+
+        .lista-citas .persona:last-of-type {
+            border-bottom: 0;
+        }
+
+        .lista-citas .persona p {
+            margin: 0;
+        }
+
+        .lista-citas .persona button {
+            margin-top: 1rem !important;
+        }
+
+        .lista-citas .persona span {
+            font-weight: bold;
+        }
+
+
+        svg {
+            width: 21px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2 class="text-center my-5 titulo justify-center ">Citas en Taller</h2>
+    <div class="container mt-5 p-5 m-5 justify-center">
+        <button onclick="meterCalendar()" class="text-center btn btn-success col-md-5 m-3">Mirar Calendario
+            Eventos</button>
+        <button onclick="meterTabla()" class="text-center btn btn-success col-md-5 m-3">Mirar Tabla Eventos</button>
+    </div>
+    <div id='calendar' style="display: none;"></div>
+    <div class="container mt-5 p-5 tabla" id="tabla123">
+        <div id="contenido" class="row">
+            <div class="col-md-6 agregar-persona">
+                <form id="nueva-persona">
+                    <legend class="mb-4">Datos de la Persona</legend>
+                    <div class="form-group row">
+                        <label class="col-sm-4 col-lg-4 col-form-label">Nombre:</label>
+                        <div class="col-sm-8 col-lg-8">
+                            <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Nombre">
+                        </div>
+                    </div>
+                    <div class="form-group row mt-3 mb-3">
+                        <label class="col-sm-4 col-lg-4 col-form-label">Apellidos:</label>
+                        <div class="col-sm-8 col-lg-8">
+                            <input type="text" id="apellidos" name="apellidos" class="form-control"
+                                placeholder="Apellidos">
+                        </div>
+                    </div>
+                    <div class="form-group row mt-3 mb-3">
+                        <label class="col-sm-4 col-lg-4 col-form-label">Eventos:</label>
+                        <div class="col-sm-8 col-lg-8">
+                            <select id="aquiaquiaqui" class="js-example-basic-multiple w-100" style="height: 10px;"
+                                name="states[]" multiple="multiple">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success w-100 d-block">Crear Persona</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h2 id="administra" class="mb-4">Listado de Personas</h2>
+                <ul id="personas" class="list-group lista-personas"></ul>
+            </div>
+        </div>
+        <!--.row-->
+    </div>
+
+    <!--.container-->
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>
+
+<script>
+    const nombreInput = document.querySelector(`#nombre`);
+    const apellidosInput = document.querySelector(`#apellidos`);
+
+    //UI
+
+    const formulario = document.querySelector(`#nueva-persona`);
+    const contenedorCitas = document.querySelector(`#personas`);
+
+
+
+    //REGISTRAR EVENTOS
+
+    let editando;
+
+    eventListener();
+
+    function eventListener() {
+        nombreInput.addEventListener(`input`, datosPersona);
+        apellidosInput.addEventListener(`input`, datosPersona);
+        document.addEventListener("DOMContentLoaded", nuevaCita);
+        document.addEventListener("DOMContentLoaded", cargarEventos);
+        formulario.addEventListener(`submit`, nuevaCita);
+    }
+
+    // CLASS DECLARATION
+    class Persona {
+        constructor(nombre, apellidos, id) {
+            this.nombre = nombre;
+            this.apellidos = apellidos;
+            this.eventos = [];
+            this.id = id;
+        }
+
+        agregarEvento(evento) {
+            this.eventos = [...this.eventos, evento];
+        }
+
+        getNombre() {
+            return this.nombre;
+        }
+
+        getApellidos() {
+            return this.apellidos;
+        }
+
+        setNombre(nombre2) {
+            this.nombre = nombre2;
+        }
+
+        setApellidos(apellidos2) {
+            this.apellidos = apellidos2;
+        }
+    }
+
+    class Evento {
+        constructor(id, titulo, start, end) {
+            this.id = id;
+            this.titulo = titulo;
+            this.start = start;
+            this.end = end;
+            this.personasListado = [];
+        }
+
+        agregarPersonaEvento(persona) {
+            this.personasListado.push(persona);
+        }
+    }
+
+    let event1 = new Evento(1, 'Cambio Ruedas', '2022-11-28 12:10', '2022-11-30 12:10');
+    let event2 = new Evento(2, 'Cambio Filtros', '2022-11-25 12:10', '2022-11-26 12:10');
+    let event3 = new Evento(3, 'Cambio Faros', '2022-11-26 12:10', '2022-11-27 12:10');
+    let eventRafa = new Evento(4, 'Reparacion Motor', '2022-11-27 12:10', '2022-11-28 12:10');
+    let eventAlex = new Evento(5, 'Pasar ITV', '2022-11-28 12:10', '2022-11-29 12:10');
+
+
+    class listaPersonas {
+        personas = [];
+        constructor() {
+
+            // this.personas = [Rafa,Alejandro];
+            var myarray = localStorage.getItem('personas');
+            myarray = JSON.parse(myarray);
+            // console.log(myarray);
+            Object.keys(myarray).forEach(a => {
+                // console.log(myarray[a]);
+                this.personas = myarray[a];
+                myarray[a].forEach(primero => {
+                    primero["eventos"].forEach(element => {
+                        // console.log(element.id);
+                        if (element.id == 1) {
+                            event1.agregarPersonaEvento(primero)
+                        } else if (element.id == 2) {
+                            event2.agregarPersonaEvento(primero)
+                        } else if (element.id == 3) {
+                            event3.agregarPersonaEvento(primero)
+                        } else if (element.id == 4) {
+                            eventRafa.agregarPersonaEvento(primero)
+                        } else if (element.id == 5) {
+                            eventAlex.agregarPersonaEvento(primero)
+                        }
+                    });
+                });
+            });
+        }
+
+
+        getPersonas() { return this.personas };
+        agregarpersona(persona) {
+            // console.log(persona);
+            this.personas = [...this.personas, persona];
+        }
+
+
+        eliminarpersona(id) {
+            // localStorage.removeItem("personas");
+            this.personas = this.personas.filter(persona => persona.id !== id);
+            sincronizarStorage();
+
+        }
+
+        editarpersona(personaActualizada) {
+            this.personas = this.personas.map(persona => persona.id === personaActualizada.id ? personaActualizada : persona)
+            sincronizarStorage();
+        }
+    }
+
+    class UI {
+        imprimirAlerta(mensaje, tipo) {
+            const divMensaje = document.createElement(`div`);
+            divMensaje.classList.add(`text-center`, `alert`, `d-block`, `col-12`);
+
+
+            if (tipo === `error`) {
+                divMensaje.classList.add(`alert-danger`);
+
+            } else {
+                divMensaje.classList.add(`alert-success`);
+            }
+
+            divMensaje.textContent = mensaje;
+
+            //AGREGAR AL DOM
+
+            document.querySelector(`#contenido`).insertBefore(divMensaje, document.querySelector(`.agregar-persona`));
+
+
+            //QUITAR LA ALERTA DESPUES DE X SEG
+            setTimeout(() => {
+                divMensaje.remove();
+            }, 5000);
+        }
+
+        // SI LE HACEMOS DESTRUCTURING EN EL PARAMETRO ES LO MISMO QUE HACERLO DENTRO
+        imprimirpersonas({ personas }) {
+            this.limpiarHTML();
+            personas.forEach(persona => {
+                const { nombre, apellidos, id, eventos } = persona;
+
+                const divpersona = document.createElement(`div`);
+                divpersona.classList.add(`persona`, `p-3`);
+                divpersona.dataset.id = id;
+
+                //SCRIPTING DELOS ELEMENTOS DE LA persona
+                const mascotaParrafo = document.createElement(`h2`);
+                mascotaParrafo.classList.add(`card-title`, `font-weight-bolder`);
+                mascotaParrafo.textContent = nombre;
+
+                const propietarioParrafo = document.createElement(`p`);
+                propietarioParrafo.innerHTML = `
+                <span class = "font-weight-bolder"> Apellidos: </span> <b>${apellidos} </b>
+            `;
+
+                const eventosParrafo = document.createElement(`p`);
+                eventosParrafo.innerHTML += `
+                <span class = "font-weight-bolder"> Evento: </span> <br> 
+            `;
+                Object.keys(eventos).forEach((i) => {
+                    eventosParrafo.innerHTML += `
+                <span class = "font-weight-bolder ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b> -${eventos[i].titulo} </b> <br>
+            `;
+                });
+                // console.log(eventos);
+
+
+
+                // const EventosParrafo = document.createElement(`p`);
+                // persona.eventos.forEach(element => {
+                //     // console.log(element.titulo);
+                // });
+                //     EventosParrafo.innerHTML = `
+                //     <span class = "font-weight-bolder"> Apellidos: </span> ${apellidos}
+                // `;
+
+                //BOTON PARA ELIMINAR persona
+                const btnEliminar = document.createElement(`button`);
+                btnEliminar.classList.add(`btn`, `btn-danger`, `m-2`);
+                btnEliminar.innerHTML = `ELIMINAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          `
+                //BOTON PARA EDITAR
+                const btnEditar = document.createElement(`button`);
+                btnEditar.classList.add(`btn`, `btn-info`, 'm-2');
+                btnEditar.innerHTML = `EDITAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+ <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+</svg>
+`
+
+                btnEliminar.onclick = () => eliminarpersona(id);
+                btnEditar.onclick = () => cargarEdicion(persona);
+                //AGREGAMOS LOS PARRAFOS AL divpersona
+                divpersona.appendChild(mascotaParrafo);
+                divpersona.appendChild(propietarioParrafo);
+                divpersona.appendChild(eventosParrafo);
+                divpersona.appendChild(btnEliminar);
+                divpersona.appendChild(btnEditar);
+
+
+                //AGREGAMOS LA persona AL HTML
+                contenedorCitas.appendChild(divpersona);
+            })
+
+
+        }
+        limpiarHTML() {
+            while (contenedorCitas.firstChild) {
+                contenedorCitas.removeChild(contenedorCitas.firstChild);
+            }
+        }
+    }
+    $(document).ready(function () {
+        $('.js-example-basic-multiple').select2();
+    });
+
+
+    const ui = new UI();
+    let Rafa = new Persona("Rafa", "Castro");
+    Rafa.eventos.push(eventRafa);
+    Rafa.id = "1";
+    let Alejandro = new Persona("Alex", "Cascos");
+    Alejandro.eventos.push(eventAlex);
+    Alejandro.id = "2";
+    const administrarPersonas = new listaPersonas();
+
+
+    // tweetsGuardados = JSON.parse(localStorage.getItem(`tweets`)) || [];
+
+    let listaEventos = [event1, event2, event3, eventAlex, eventRafa];
+
+    // console.log(listaEventos);
+    // console.log(event2);
+    function datosPersona(e) {
+        Persona[e.target.name] = e.target.value;
+        // console.log(Persona);
+    }
+    let arrayPruebaEventos;
+    function nuevaCita(e) {
+        e.preventDefault();
+        JSON.parse(localStorage.getItem("usuario"));
+        //EXTRAER LA INFORMACION DEL OBJETO DE CITAS
+        const { nombre, apellidos } = Persona;
+        let eventoNuevo;
+
+        if (nombre === `` || apellidos === ``) {
+            ui.imprimirAlerta(`Todos los campos son obligatorios`, `error`);
+
+            return;
+        }
+
+        if (editando) {
+            ui.imprimirAlerta(`EDITADO CORRECTAMENTE`);
+            let listaNueva = [];
+            listaEventos.forEach(element => {
+                // console.log(element);
+                $("#aquiaquiaqui").each(function () {
+                    $(this).val().forEach(a => {
+                        // console.log(element.id + " elemento");
+                        // console.log(parseInt(a) + " a");
+                        if (element.id == parseInt(a)) {
+                            // console.log(123123123);  
+                            eventoNuevo = new Evento(element.id, element.titulo, element.start, element.end);
+
+                            listaNueva.push(eventoNuevo);
+                        }
+                    });
+                });
+            });
+            Persona.eventos = listaNueva;
+
+            //PASAR EL OBJETO DE LA CITA A EDICION
+            administrarPersonas.editarpersona({ ...Persona });
+            //QUITAR MODO EDICION
+            Swal.fire(
+                'Editado Correctamente!',
+                `Has editado a ${Persona.nombre}`,
+                'success'
+            )
+            formulario.querySelector(`button[type="submit"]`).textContent = `Crear Cita`;
+            editando = false;
+        } else {
+            //GENERAR UN ID UNICO
+            if (Persona.nombre == null) {
+
+            } else if (Persona.id == 1 || Persona.id == 2) {
+                Persona.id = Date.now();
+
+                //CREANDO UNA NUEVA CITA
+                //SI LE PASO EL Persona ME COGERA ELL ULTIMO OBJETO Y ME LO SOBREESCRIBIRA EN TODOS, TENGO QUE PASARLE UNA COPIA DE EL
+                // administrarPersonas.agregarCita(Persona);
+                //SE HACE ASI CON SPREAD OPERATOR:
+
+                administrarPersonas.agregarpersona({ ...Persona });
+                //MENSAJE AGREGADO CORRECTAMENTE
+                ui.imprimirAlerta(`SE AGREGO CORRECTAMENTE`);
+            } else {
+                Persona.id = Date.now();
+
+                let listaNueva = [];
+                listaEventos.forEach(element => {
+                    // console.log(element);
+                    $("#aquiaquiaqui").each(function () {
+                        $(this).val().forEach(a => {
+                            // console.log(a);
+                            // console.log(element.id + " elemento");
+                            // console.log(parseInt(a) + " a");
+                            if (element.id == parseInt(a)) {
+                                eventoNuevo = new Evento(element.id, element.titulo, element.start, element.end);
+
+                                listaNueva.push(eventoNuevo);
+
+
+                            }
+                        });
+                    });
+                });
+
+
+                Persona.eventos = listaNueva;
+                // let personaEscandalo = new Persona(Persona.nombre, Persona.apellidos, Persona.id);
+                // console.log(eventoNuevo);
+                // console.log(Persona.eventos);
+                // console.log(Persona.eventos);
+                //CREANDO UNA NUEVA CITA
+                //SI LE PASO EL Persona ME COGERA ELL ULTIMO OBJETO Y ME LO SOBREESCRIBIRA EN TODOS, TENGO QUE PASARLE UNA COPIA DE EL
+                // administrarPersonas.agregarCita(Persona);
+                //SE HACE ASI CON SPREAD OPERATOR:
+                // localStorage.setItem("usuario", JSON.stringify(Persona));
+                administrarPersonas.agregarpersona({ ...Persona });
+                //MENSAJE AGREGADO CORRECTAMENTE
+                ui.imprimirAlerta(`SE AGREGO CORRECTAMENTE`);
+                Swal.fire(
+                    'Enhorabuena!',
+                    `Has creado a ${Persona.nombre}`,
+                    'success'
+                )
+            }
+        }
+        // console.log($('#aquiaquiaqui').select2().val());
+
+        formulario.reset();
+        $('#aquiaquiaqui').val(null).trigger('change');
+        reiniciarObjeto();
+        // AGREGAR LA CITA AL HTML
+        ui.imprimirpersonas(administrarPersonas);
+        sincronizarStorage();
+    }
+
+    function reiniciarObjeto() {
+        Persona.nombre = ``,
+            Persona.apellidos = ``
+    }
+
+    function meterCalendar() {
+        document.getElementById('tabla123').style.display = 'none';
+        document.getElementById('calendar').style.display = 'block';
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            // plugins: [ 'dayGrid', 'timeGrid' ],
+            headerToolbar: {
+                start: 'title', // will normally be on the left. if RTL, will be on the right
+                center: 'dayGridMonth,dayGridWeek',
+                end: 'today prev,next' // will normally be on the right. if RTL, will be on the left
+            },
+            views: {
+                dayGridWeek: {
+                    type: 'timeGrid',
+                    duration: { weeks: 2 },
+                    buttonText: '15 Dias'
+                },
+                dayGridMonth: {
+                    type: 'timeGrid',
+                    buttonText: 'Mes'
+                },
+            },
+            editable: true,
+            locale: 'es',
+            draggable: true,
+            initialView: 'listWeek',
+            footerToolbar: {
+                left: 'custom1,custom2',
+                center: '',
+                right: 'prev,next'
+            },
+            customButtons: {
+                custom1: {
+                    text: 'custom 1',
+                    click: function () {
+                        alert('Ojo cuidao!');
+                    }
+                },
+                custom2: {
+                    text: 'custom 2',
+                    click: function () {
+                        alert('Bomba!');
+                    }
+                }
+            },
+            events: [
+                { id: 1, title: "Cambio Ruedas", start: '2022-11-25 12:10', end: '2022-11-30 13:00', personas: [event1] },
+                { id: 2, title: "Cambio Filtros", start: '2022-11-10 09:40', end: '2022-11-12 12:00', personas: [event2] },
+                { id: 3, title: "Cambio Faros", start: '2022-11-10 09:40', end: '2022-11-12 12:00', personas: [event3] },
+                { id: 4, title: "Pasar ITV", start: '2022-11-10 09:40', end: '2022-11-12 12:00', personas: [eventRafa] },
+                { id: 5, title: "Reparacion Motor", start: '2022-11-10 09:40', end: '2022-11-12 12:00', personas: [eventAlex] },
+            ],
+            eventContent: function (arg) {
+
+                // console.log(arg.event);
+                let HTML = arg.event.title;
+                let asd;
+                HTML += "<ol>";
+                arg.event.extendedProps.personas.forEach(persona => {
+                    // console.log(persona["id"]);
+                    persona["personasListado"].forEach(element => {
+                        HTML += "<li>" + element["nombre"] + "</li>";
+                        // console.log(element);
+
+                        let persona = new Persona(element["nombre"], element["apellidos"], element["id"]);
+                        HTML += `<button class="btn btn-info m-2" onclick='mostrarInfo(${JSON.stringify(element)})'>Info</button>`;
+                        HTML += `<button class="btn btn-danger m-2" onclick='eliminarpersona(${JSON.stringify(element["id"])})'>Eliminar</button>`;
+                        // <button class="asdasd" onclick="mostrarInfo()">Info</button>
+
+                        // console.log(element["nombre"]);
+                    });
+                    HTML += `<button class="btn btn-info m-2" onclick='addPersonEvent(${JSON.stringify(persona["id"])})'>Agregar Persona</button>`;
+                    // console.log(persona["personasListado"][0]["nombre"]);
+                });
+
+                HTML += "</ol>";
+
+                return { html: HTML }
+            }
+        });
+        calendar.render();
+    }
+
+    function mostrarInfo(asd) {
+        Swal.fire(
+            'Los datos son:',
+            `El nombre es: ${asd.nombre} <br> Los apellidos son: ${asd.apellidos}`,
+            'success'
+        )
+    }
+
+    function meterTabla() {
+        document.getElementById('calendar').style.display = 'none';
+        document.getElementById('tabla123').style.display = 'block';
+    }
+
+    function addPersonEvent(id) {
+        console.log(id);
+        Swal.fire({
+            title: 'Añade una Persona',
+            html: `<input type="text" id="login" class="swal2-input" placeholder="Nombre">
+  <input type="text" id="password" class="swal2-input" placeholder="Apellido">`,
+            confirmButtonText: 'Añadir Persona',
+            focusConfirm: false,
+            preConfirm: () => {
+                const login = Swal.getPopup().querySelector('#login').value
+                const password = Swal.getPopup().querySelector('#password').value
+                if (!login || !password) {
+                    Swal.showValidationMessage(`Inserta Nombre y Apellidos`)
+                }
+                return { login: login, password: password }
+            }
+        }).then((result) => {
+            let primero = new Persona(result.value.login, result.value.password, Date.now());
+            // console.log(persona);
+            if (id == 1) {
+                primero.agregarEvento(event1);
+                event1.agregarPersonaEvento(primero);
+            } else if (id == 2) {
+                primero.agregarEvento(event2);
+                event2.agregarPersonaEvento(primero);
+            } else if (id == 3) {
+                primero.agregarEvento(event3);
+                event3.agregarPersonaEvento(primero);
+            } else if (id == 4) {
+                primero.agregarEvento(eventRafa);
+                eventRafa.agregarPersonaEvento(primero)
+            } else if (id == 5) {
+                primero.agregarEvento(eventAlex);
+                eventAlex.agregarPersonaEvento(primero)
+            }
+            administrarPersonas.agregarpersona({ ...primero });
+            ui.imprimirpersonas(administrarPersonas);
+            sincronizarStorage();
+            Swal.fire(`
+            El usuario ha sido añadido!`,
+                `
+    Nombre: ${result.value.login}
+    Apellidos: ${result.value.password}`.trim())
+
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+
+        })
+
+
+
+    }
+
+    function eliminarpersona(id) {
+        Swal.fire({
+            title: 'Estas seguro?',
+            text: "No podras revertir este cambio!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Cancelar',
+            confirmButtonText: 'Si, eliminalo!'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+                //ELIMINAR LA CITA
+                administrarPersonas.eliminarpersona(id);
+                //MUESTRE UN MENSAJE
+                ui.imprimirAlerta(`SE HA ELIMINADO CORRECTAMENTE`);
+                //REFRESQUE LAS CITAS
+                ui.imprimirpersonas(administrarPersonas)
+                Swal.fire(
+                    'Eliminado!',
+                    'Esta persona ha sido eliminada de la lista.',
+                    'success'
+                )
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }
+        })
+    }
+
+    function cargarEventos(e) {
+        e.preventDefault();
+        listaEventos.forEach(a => {
+            document.getElementById('aquiaquiaqui').innerHTML += `<option value="${a.id}">${a.titulo}</option>`
+        });
+    }
+
+    function cargarEdicion(persona) {
+        // CARGA LOS DATOS Y EL MODO EDICION
+        const { nombre, apellidos, id, eventos } = persona;
+
+        //LLENAMOS LOS INPUTS
+        nombreInput.value = nombre;
+        apellidosInput.value = apellidos;
+
+
+        // //You need a id for set values
+        // $.each($("#aquiaquiaqui"), function () {
+        //     $(this).select2('val', persona.eventos);
+        // });
+        let lista2 = [];
+        if (persona.eventos.length > 1) {
+            for (i in persona.eventos) {
+                lista2.push(persona.eventos[i].id);
+                // $('#aquiaquiaqui').val(persona.eventos[i].id).trigger('change.select2');
+                // console.log($('#aquiaquiaqui').val(persona.eventos[i].id).trigger('change.select2'));
+                // console.log(prueba);
+            }
+            // console.log(lista2);
+            $('#aquiaquiaqui').val(lista2).trigger('change.select2');
+        } else if (persona.eventos.length == 1) {
+            $('#aquiaquiaqui').val(persona.eventos[0].id).trigger('change.select2');
+        }
+        // console.log(persona.eventos);
+        // Object.keys(persona.eventos).forEach((i);
+        // console.log("HOLA");
+        // console.log(persona.eventos[i]);
+        // $('#aquiaquiaqui').val('2').trigger('change.select2');
+        // LLENAR EL OBJETO TAMBIEN
+        Persona.nombre = nombre;
+        Persona.apellidos = apellidos;
+        Persona.id = id;
+        Persona.eventos = eventos;
+        //CAMBIAR EL TEXTO DEL BOTON
+        formulario.querySelector(`button[type="submit"]`).textContent = `Guardar Cambios`;
+        editando = true;
+    }
+    function sincronizarStorage() {
+        var seen = [];
+        //AGREGA LOS TWEETS A LOCALSTORAGE
+        localStorage.setItem(`personas`, JSON.stringify(administrarPersonas, function (key, val) {
+            if (val != null && typeof val == "object") {
+                if (seen.indexOf(val) >= 0) {
+                    return;
+                }
+                seen.push(val);
+            }
+            return val;
+        })
+        );
+
+    }
+</script>
